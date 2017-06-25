@@ -1,19 +1,25 @@
 require 'nokogiri'
-require 'open-uri'
+require 'faraday'
 require 'pry'
 
 class Inspector
 
-  def initialize(url)
-    @document        = read(url)
+  def initialize(url, coin="eth_usd")
+    @url = url
+    @coin = coin
+    @document = response.body
   end
 
-  def read(url)
-    open(url)
+  def connection
+    Faraday.new(@url)
+  end
+
+  def response
+    connection.get("/exchange/#{@coin}")
   end
   # Returns the whole parsed document
   def parsed
-    @parsed ||= Nokogiri::HTML(@document.to_s)
+    @parsed ||= Nokogiri::HTML(@document)
   end
 
   def inspect
